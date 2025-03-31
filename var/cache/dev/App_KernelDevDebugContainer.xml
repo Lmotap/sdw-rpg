@@ -165,12 +165,23 @@
     <service id="App\Entity" class="App\Entity" abstract="true">
       <tag name="container.excluded" source="in &quot;config/services.yaml&quot;"/>
     </service>
-    <service id="App\Command\CombatCommand" class="App\Command\CombatCommand" autowire="true" autoconfigure="true">
+    <service id="App\Command\CharacterResetCommand" class="App\Command\CharacterResetCommand" autowire="true" autoconfigure="true">
       <tag name="console.command"/>
       <tag name="container.no_preload"/>
       <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <call method="setName">
+        <argument>app:character:reset</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Reset or create a new player character</argument>
+      </call>
+    </service>
+    <service id="App\Command\CombatCommand" class="App\Command\CombatCommand" autowire="true" autoconfigure="true">
+      <tag name="console.command"/>
+      <tag name="container.no_preload"/>
       <argument type="service" id="App\Service\GameService"/>
       <argument type="service" id="App\Service\CharacterService"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
       <call method="setName">
         <argument>app:combat</argument>
       </call>
@@ -183,7 +194,9 @@
       <argument type="service" id="doctrine"/>
     </service>
     <service id="App\Service\CharacterService" class="App\Service\CharacterService" autowire="true" autoconfigure="true"/>
-    <service id="App\Service\GameService" class="App\Service\GameService" autowire="true" autoconfigure="true"/>
+    <service id="App\Service\GameService" class="App\Service\GameService" autowire="true" autoconfigure="true">
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+    </service>
     <service id="argument_metadata_factory" class="Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory"/>
     <service id="argument_resolver.backed_enum_resolver" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver">
       <tag priority="100" name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver">controller.argument_value_resolver</tag>
@@ -2363,6 +2376,8 @@
       <argument>doctrine_migration_versions</argument>
     </service>
     <service id="doctrine.migrations.storage.table_storage" class="Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration"/>
+    <service id=".instanceof.Symfony\Component\Console\Command\Command.0.App\Command\CharacterResetCommand" class="App\Command\CharacterResetCommand" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Command\CharacterResetCommand" class="App\Command\CharacterResetCommand" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Console\Command\Command.0.App\Command\CombatCommand" class="App\Command\CombatCommand" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Command\CombatCommand" class="App\Command\CombatCommand" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\CharacterRepository" class="App\Repository\CharacterRepository" autowire="true" abstract="true"/>
@@ -3043,6 +3058,13 @@
     <service id=".errored..service_locator.zHyJIs5.Symfony\Component\Config\Loader\LoaderInterface" class="Symfony\Component\Config\Loader\LoaderInterface">
       <tag name="container.error" message="Cannot autowire service &quot;.service_locator.zHyJIs5&quot;: it needs an instance of &quot;Symfony\Component\Config\Loader\LoaderInterface&quot; but this type has been excluded from autowiring."/>
     </service>
+    <service id=".App\Command\CharacterResetCommand.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>app:character:reset</argument>
+      <argument type="collection"/>
+      <argument>Reset or create a new player character</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="App\Command\CharacterResetCommand"/>
+    </service>
     <service id=".App\Command\CombatCommand.lazy" class="Symfony\Component\Console\Command\LazyCommand">
       <argument>app:combat</argument>
       <argument type="collection"/>
@@ -3519,8 +3541,9 @@
     </service>
     <service id="console.command_loader" class="Symfony\Component\Console\CommandLoader\ContainerCommandLoader" public="true">
       <tag name="container.no_preload"/>
-      <argument type="service" id=".service_locator.cjy3HLn"/>
+      <argument type="service" id=".service_locator.UTMQR2l"/>
       <argument type="collection">
+        <argument key="app:character:reset">App\Command\CharacterResetCommand</argument>
         <argument key="app:combat">App\Command\CombatCommand</argument>
         <argument key="about">console.command.about</argument>
         <argument key="assets:install">console.command.assets_install</argument>
@@ -3609,9 +3632,10 @@
         <argument key="make:webhook">maker.auto_command.make_webhook</argument>
       </argument>
     </service>
-    <service id=".service_locator.cjy3HLn" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.UTMQR2l" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
+        <argument key="App\Command\CharacterResetCommand" type="service_closure" id=".App\Command\CharacterResetCommand.lazy"/>
         <argument key="App\Command\CombatCommand" type="service_closure" id=".App\Command\CombatCommand.lazy"/>
         <argument key="console.command.about" type="service_closure" id=".console.command.about.lazy"/>
         <argument key="console.command.assets_install" type="service_closure" id=".console.command.assets_install.lazy"/>

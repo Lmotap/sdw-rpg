@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use AllowDynamicProperties;
 use App\Repository\CharacterRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -23,8 +22,8 @@ class Character
     #[ORM\Column]
     private int $constitution;
 
-    #[ORM\Column]
-    private string $class;
+    #[ORM\Column(length: 50)]
+    private ClassEnum $class;
 
     #[ORM\Column]
     private int $xp;
@@ -39,10 +38,9 @@ class Character
         string $name,
         int $strength,
         int $constitution,
-        string $class = 'Unknown',
+        ClassEnum $class,
         int $xp = 0,
         int $level = 0,
-        int $health = 0
     )
     {
         $this->name = $name;
@@ -64,7 +62,7 @@ class Character
         return $this->name;
     }
 
-    public function getClass(): string
+    public function getClass(): ClassEnum
     {
         return $this->class;
     }
@@ -107,6 +105,12 @@ class Character
         return $this->constitution;
     }
 
+    public function setClass(ClassEnum $class): self
+    {
+        $this->class = $class;
+        return $this;
+    }
+
     public function setConstitution(int $constitution): self
     {
         $this->constitution = $constitution;
@@ -122,6 +126,11 @@ class Character
     {
         $this->health = $health;
         return $health;
+    }
+
+    public function setXp(int $xp): void
+    {
+        $this->xp = $xp;
     }
 
     public function addXp(int $xp): void
