@@ -6,7 +6,7 @@ use App\Repository\CharacterRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CharacterRepository::class)]
-class Character
+class Enemy
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -14,19 +14,13 @@ class Character
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    private string $name;
+    private EnemiesNameEnum $name;
 
     #[ORM\Column]
     private int $strength;
 
     #[ORM\Column]
     private int $constitution;
-
-    #[ORM\Column(length: 50)]
-    private ClassEnum $class;
-
-    #[ORM\Column]
-    private int $xp;
 
     #[ORM\Column]
     private int $health;
@@ -35,17 +29,15 @@ class Character
     private int $level;
 
     public function __construct(
-        string $name,
-        int $strength,
-        int $constitution,
-        ClassEnum $class,
-        int $xp = 0,
-        int $level = 0,
+        EnemiesNameEnum $name,
+        int             $strength,
+        int             $constitution,
+        int             $xp = 0,
+        int             $level = 0,
     )
     {
         $this->name = $name;
         $this->strength = $strength;
-        $this->class = $class;
         $this->constitution = $constitution;
         $this->xp = $xp;
         $this->level = $level;
@@ -57,17 +49,22 @@ class Character
         return $this->id;
     }
 
-    public function getName(): string
+    public function getName(): EnemiesNameEnum
     {
         return $this->name;
     }
 
-    public function getClass(): ClassEnum
+    public function getNameAsString(): string
     {
-        return $this->class;
+        return $this->name->value;
     }
 
-    public function setName(string $name): self
+    public function getRandomEnemy(): int
+    {
+        return array_rand(EnemiesNameEnum::cases());
+    }
+
+    public function setName(EnemiesNameEnum $name): self
     {
         $this->name = $name;
         return $this;
@@ -81,11 +78,6 @@ class Character
     public function getLevel(): int
     {
         return $this->level;
-    }
-
-    public function getXp(): int
-    {
-        return $this->xp;
     }
 
     public function setStrength(int $strength): self
@@ -105,12 +97,6 @@ class Character
         return $this->constitution;
     }
 
-    public function setClass(ClassEnum $class): self
-    {
-        $this->class = $class;
-        return $this;
-    }
-
     public function setConstitution(int $constitution): self
     {
         $this->constitution = $constitution;
@@ -126,18 +112,6 @@ class Character
     {
         $this->health = $health;
         return $health;
-    }
-
-    public function setXp(int $xp): void
-    {
-        $this->xp = $xp;
-    }
-
-    public function addXp(int $xp): void
-    {
-        $newXp = $this->getXp() + $xp;
-
-        $this->xp = $newXp;
     }
 
     public function getAttack(): int

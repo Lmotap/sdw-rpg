@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\Character;
+use App\Service\GameService;
+use App\Service\CharacterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,52 +16,47 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CombatCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(
+        private GameService $gameService,
+        private CharacterService $characterService,
+        private EntityManagerInterface $entityManager,
+    )
     {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $character = $this->getPlayerCharacter();
-        $enemy = $this->generateEnemy();
+        $character = $this->gameService->getPlayerCharacter();
+        $enemy = $this->gameService->generateEnemy();
 
-        $output->writeln("⚔️ Combat starts: {$character->getName()} vs {$enemy['name']}");
-        $output->writeln("");
+        $output->writeln("LVL: {$character->getLevel()} XP: {$character->getXp()}");
+        $output->write('HP du personnage: ' . $character->getHealth() . ' ' . 'HP de l\'ennemi: ' . $enemy->getHealth());
+        $output->writeln('');
+        $output->writeln("⚔️ Combat starts: {$character->getName()} vs {$enemy->getNameAsString()}");
 
-        $winner = $this->fight($character, $enemy, $output);
+        $winner = $this->gameService->fight($character, $enemy, $output);
 
-        $output->writeln("🏆 Winner: $winner");
+        $playerWon = $character->getHealth() > 0 && $enemy->getHealth() <= 0;
+        
+        if ($playerWon) {
+            $this->characterService->calculateXp($character->getLevel(), $character->getXp(), $character->getHealth(), $enemy, $character, $this->entityManager);
+            $output->writeln("💪 Vous avez gagné XP! Total XP: {$character->getXp()}");
+            
+            if ($this->characterService->canLevelUp($character)) {
+                $output->writeln("💪 You have leveled up!");
+                $this->characterService->levelUp($character, $input, $output, $this->entityManager);
+            }
+            
+            $output->writeln("🏆 Winner: You win");
+        } else {
+            $previousXp = $character->getXp();
+            $this->characterService->calculateXp($character->getLevel(), $character->getXp(), -1, $enemy, $character, $this->entityManager);
+            $lostXp = $previousXp - $character->getXp();
+            $output->writeln("☠️ Vous êtes mort et avez perdu {$lostXp} XP. XP restant: {$character->getXp()}");
+            $output->writeln("🏆 Winner: Vous avez perdu");
+        }
+
         return Command::SUCCESS;
-    }
-
-    private function getPlayerCharacter(): Character
-    {
-        return new Character('Hero', 0,0);
-    }
-
-    private function generateEnemy(): array
-    {
-        // AI enemy with random but balanced stats
-        return [
-            'name' => 'Goblin',
-            'strength' => rand(2, 4),
-            'constitution' => rand(2, 4),
-            'hp' => 10 + (rand(2, 4) * 2),
-            'attack' => 2 + rand(2, 4),
-            'defense' => 1 + (rand(2, 4) * 0.5),
-        ];
-    }
-
-    private function fight(Character $character, array $enemy, OutputInterface $output): string
-    {
-        // Combat loop
-
-        // Player attacks
-        // Enemy attacks
-
-        // Check HP and return winner
-
-        return 'winner?';
     }
 }
