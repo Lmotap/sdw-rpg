@@ -25,7 +25,7 @@ class CombatCommand extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $character = $this->gameService->getPlayerCharacter();
         $enemy = $this->gameService->generateEnemy();

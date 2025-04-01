@@ -124,6 +124,11 @@ class Character
 
     public function setHealth(int $health): int
     {
+        if ($health < 0) {
+            $this->health = 0;
+            return 0;
+        }
+
         $this->health = $health;
         return $health;
     }

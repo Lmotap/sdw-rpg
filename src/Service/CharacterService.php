@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Character;
 use App\Entity\Enemy;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,13 +13,21 @@ use Symfony\Component\Console\Input\InputInterface;
 
 class CharacterService
 {
+    public function __construct(
+        private Randomizer $randomizer,
+        private ?QuestionHelper $questionHelper = null,
+    )
+    {
+    }
 
-    public function calculateXp(int $lvl, int $xp, int $health, Enemy $enemy, Character $character, EntityManagerInterface $em): int
+
+
+    public function calculateXp(int $lvl, int $xp, int $health, Enemy $enemy, Character $character, EntityManager $em): int
     {
         $xpByDefault = $character->getXp();
 
         if ($enemy->getHealth() <= 0) {
-            $xpGained = ($enemy->getLevel() * 20) + rand(10, 30);
+            $xpGained = ($enemy->getLevel() * 20) + $this->randomizer->rand(10, 30);
             $character->addXp($xpGained);
             $em->persist($character);
             $em->flush();
@@ -51,7 +60,7 @@ class CharacterService
 
     public function levelUp(Character $character, InputInterface $input, OutputInterface $output, EntityManagerInterface $em): int
     {        
-        $helper = new QuestionHelper();
+        $helper = $this->questionHelper ?? new QuestionHelper();
         $question = new ChoiceQuestion(
             'Choissisez une caractéristique à augmenter (0 pour Strength, 1 pour Constitution):',
             ['Strength', 'Constitution'],

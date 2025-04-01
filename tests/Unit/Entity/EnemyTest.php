@@ -37,7 +37,7 @@ class EnemyTest extends TestCase
         $this->assertEquals(6, $enemy->getDefense());
     }
 
-    public function testCharacterSetterAttributes(): void
+    public function testEnemySetterAttributes(): void
     {
         $enemy = new Enemy(EnemiesNameEnum::GOBLIN, 10, 10);
 
@@ -55,6 +55,21 @@ class EnemyTest extends TestCase
 
         $enemy->setLevel(5);
         $this->assertEquals(5, $enemy->getLevel());
+    }
+
+    public function testGetNameAsString()
+    {
+        $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
+        $this->assertEquals('🐲 Dragon', $enemy->getNameAsString());
+    }
+
+    public function testGetRandomEnemy()
+    {
+        $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
+        $randomIndex = $enemy->getRandomEnemy();
+        
+        $this->assertGreaterThanOrEqual(0, $randomIndex);
+        $this->assertLessThan(count(EnemiesNameEnum::cases()), $randomIndex);
     }
 
 }

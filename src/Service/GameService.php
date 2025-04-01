@@ -11,11 +11,11 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class GameService
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private Randomizer $randomizer,
+    )
     {
-        $this->entityManager = $entityManager;
     }
 
     public function getPlayerCharacter(): Character
@@ -41,15 +41,16 @@ class GameService
         $character = $this->getPlayerCharacter();
         $playerLevel = $character->getLevel();
         
-        $randomEnemyType = EnemiesNameEnum::cases()[rand(0, count(EnemiesNameEnum::cases()) - 1)];
+        $randomEnemyType = EnemiesNameEnum::cases()[$this->randomizer->rand(0, count(EnemiesNameEnum::cases()) - 1)];
         
-        $enemyLevel = max(1, $playerLevel + rand(-1, 2));
+        $enemyLevel = max(1, $playerLevel + $this->randomizer->rand(-1, 2));
         
-        $strength = rand(1, 3) + floor($enemyLevel * 0.7);
-        $constitution = rand(1, 3) + floor($enemyLevel * 0.5);
+        $strength = $this->randomizer->rand(1, 3) + floor($enemyLevel * 0.7);
+        $constitution = $this->randomizer->rand(1, 3) + floor($enemyLevel * 0.5);
         
         return new Enemy($randomEnemyType, $strength, $constitution, 0, $enemyLevel);
     }
+    
     public function fight(Character $character, Enemy $enemy, ?OutputInterface $output = null): string
     {
         $round = 0;
@@ -80,45 +81,27 @@ class GameService
 
     public function hitRoll(Character $character, Enemy $enemy): int
     {
+        $roll = $this->randomizer->rand(1, 100);
+
         $hitPercentage = 75 + ($character->getStrength() - $enemy->getConstitution()) * 3 + $character->getLevel();
-
-        $roll = rand(1, 100);
-
-        $hitPercentage = min(95, max(50, $hitPercentage));
 
         if ($roll < $hitPercentage) {
             // Damage = max⁡((Attacker Attack − Defender Defense) × R, 1)
-            return max(($character->getAttack() - $enemy->getDefense()) * 0.8 - 1.2,1);
+            return max(($character->getAttack() - $enemy->getDefense()) * 0.8 - 1.2, 1);
         } else {
             return 0;
         }
     }
 
-
     public function enemyHitRoll(Character $character, Enemy $enemy): int
     {
-        $hitPercentage = 75 + ($enemy->getStrength() - $character->getConstitution()) * 3 + $enemy->getLevel();
-        $hitPercentage = min(95, max(50, $hitPercentage)); 
+        $roll = $this->randomizer->rand(1, 100);
 
-        $roll = rand(1, 100);
+        $hitPercentage = 75 + ($enemy->getStrength() - $character->getConstitution()) * 3 + $enemy->getLevel();
 
         if ($roll < $hitPercentage) {
-            $levelScalingFactor = 1 + ($character->getLevel() * 0.15); 
-            $randomMultiplier = rand(80, 120) / 100; 
-
-            $baseDamage = max(($enemy->getAttack() - $character->getDefense()), 1);
-            $scaledDamage = $baseDamage * $randomMultiplier * $levelScalingFactor;
-            
-            $bonusDamagePowerfulEnemy = 0;
-            if ($enemy->getName() === EnemiesNameEnum::DRAGON) {
-                $bonusDamagePowerfulEnemy += 2;
-            } elseif ($enemy->getName() === EnemiesNameEnum::DEMON || $enemy->getName() === EnemiesNameEnum::VAMPIRE) {
-                $bonusDamagePowerfulEnemy += 1;
-            }
-            
-            $finalDamage = max((int)($scaledDamage) + $bonusDamagePowerfulEnemy, 1);
-            
-            return $finalDamage;
+            // Damage = max⁡((Attacker Attack − Defender Defense) × R, 1)
+            return max(($enemy->getAttack() - $character->getDefense()) * 0.8 - 1.2, 1);
         } else {
             return 0;
         }
