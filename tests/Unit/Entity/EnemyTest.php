@@ -28,13 +28,21 @@ class EnemyTest extends TestCase
     public function testEnemyAttack(): void
     {
         $enemy = new Enemy(EnemiesNameEnum::GOBLIN, 9, 10);
-        $this->assertEquals(11, $enemy->getAttack());
+        // Attack = 5 + (strength * 1.5) + (level * 2)
+        // = 5 + (9 * 1.5) + (0 * 2)
+        // = 5 + 13.5 + 0
+        // = 18
+        $this->assertEquals(18, $enemy->getAttack());
     }
 
     public function testEnemyDefense(): void
     {
         $enemy = new Enemy(EnemiesNameEnum::GOBLIN, 9, 10);
-        $this->assertEquals(6, $enemy->getDefense());
+        // Defense = 1 + (constitution * 0.3) + (level * 0.5)
+        // = 1 + (10 * 0.3) + (0 * 0.5)
+        // = 1 + 3 + 0
+        // = 4
+        $this->assertEquals(4, $enemy->getDefense());
     }
 
     public function testEnemySetterAttributes(): void
@@ -57,13 +65,13 @@ class EnemyTest extends TestCase
         $this->assertEquals(5, $enemy->getLevel());
     }
 
-    public function testGetNameAsString()
+    public function testGetNameAsString(): void
     {
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
         $this->assertEquals('🐲 Dragon', $enemy->getNameAsString());
     }
 
-    public function testGetRandomEnemy()
+    public function testGetRandomEnemy(): void
     {
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
         $randomIndex = $enemy->getRandomEnemy();

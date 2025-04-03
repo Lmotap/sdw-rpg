@@ -45,10 +45,10 @@ class GameService
         
         $enemyLevel = max(1, $playerLevel + $this->randomizer->rand(-1, 2));
         
-        $strength = $this->randomizer->rand(1, 3) + floor($enemyLevel * 0.7);
-        $constitution = $this->randomizer->rand(1, 3) + floor($enemyLevel * 0.5);
+        $strength = $this->randomizer->rand(2, 4) + floor($enemyLevel * 1.5);
+        $constitution = $this->randomizer->rand(2, 4) + floor($enemyLevel * 1.0);
         
-        return new Enemy($randomEnemyType, $strength, $constitution, 0, $enemyLevel);
+        return new Enemy($randomEnemyType, $strength, $constitution, $enemyLevel);
     }
     
     public function fight(Character $character, Enemy $enemy, ?OutputInterface $output = null): string

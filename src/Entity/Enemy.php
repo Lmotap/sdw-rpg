@@ -32,14 +32,12 @@ class Enemy
         EnemiesNameEnum $name,
         int             $strength,
         int             $constitution,
-        int             $xp = 0,
         int             $level = 0,
     )
     {
         $this->name = $name;
         $this->strength = $strength;
         $this->constitution = $constitution;
-        $this->xp = $xp;
         $this->level = $level;
         $this->health = 10 + ($this->getConstitution() * 2) + ($this->getLevel() * 2);
     }
@@ -116,11 +114,11 @@ class Enemy
 
     public function getAttack(): int
     {
-        return 2 + ($this->getStrength() * 1) + ($this->getLevel() * 1);
+        return 5 + ($this->getStrength() * 1.5) + ($this->getLevel() * 2);
     }
 
     public function getDefense(): int
     {
-        return 1 + ($this->getConstitution() * 0.5) + ($this->getLevel() * 0.5);
+        return 1 + ($this->getConstitution() * 0.3) + ($this->getLevel() * 0.5);
     }
 }

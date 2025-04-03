@@ -24,9 +24,9 @@ class CharacterServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->em = $this->createMock(EntityManager::class);
-        $this->em->expects($this->any())
+        $this->em
             ->method('persist');
-        $this->em->expects($this->any())
+        $this->em
             ->method('flush');
 
         $this->randomizer = $this->createMock(Randomizer::class);
@@ -41,21 +41,19 @@ class CharacterServiceTest extends TestCase
             ->with(10, 30)
             ->willReturn(17);
 
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
-        $enemy = new Enemy(EnemiesNameEnum::DEMON, 1, 1, 0, 1);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
+        $enemy = new Enemy(EnemiesNameEnum::DEMON, 1, 1, 1);
 
         $character->setXp(0);
         $enemy->setHealth(0);
         $result = $this->characterService->calculateXp(1, 0, 10, $enemy, $character, $this->em);
         
-
         $this->assertEquals(37, $result);
 
         $character->setXp(300);
         $enemy->setHealth(10);
         $result = $this->characterService->calculateXp(1, 300, 0, $enemy, $character, $this->em);
         
-
         $this->assertEquals(201, $result);
     }
 
@@ -116,7 +114,7 @@ class CharacterServiceTest extends TestCase
 
     public function testCanLevelUp()
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
 
         $character->setLevel(1);
         $character->setXp(100);
@@ -132,7 +130,7 @@ class CharacterServiceTest extends TestCase
 
     public function testCalculateXpWithHighLevel()
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $character->setLevel(25);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
         
@@ -143,7 +141,7 @@ class CharacterServiceTest extends TestCase
 
     public function testCalculateXpWithNormalLevel()
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $character->setLevel(5);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
         

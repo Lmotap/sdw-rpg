@@ -30,9 +30,9 @@ class GameServiceTest extends TestCase
         $this->gameService = new GameService($this->em, $this->randomizer);
     }
 
-    public function testHitRollSuccess()
+    public function testHitRollSuccess(): void
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
 
         // hitPercentage = 75 + (3-1)*3 + 1 = 82
@@ -42,9 +42,9 @@ class GameServiceTest extends TestCase
         $this->assertEquals(2, $result);
     }
 
-    public function testHitRollMiss()
+    public function testHitRollMiss(): void
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
 
         $this->randomizer->method('rand')->willReturn(90);
@@ -52,24 +52,24 @@ class GameServiceTest extends TestCase
         $this->assertEquals(0, $result);
     }
 
-    public function testEnemyHitRollSuccess()
+    public function testEnemyHitRollSuccess(): void
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
 
         $this->randomizer->method('rand')->willReturn(50);
         $result = $this->gameService->enemyHitRoll($character, $enemy);
         
         // Damage = max((Attacker Attack - Defender Defense) * 0.8 - 1.2, 1)
-        // Attack = 1 + 1 = 2
-        // Defense = 3 + 1 = 4
-        // Damage = max((2 - 4) * 0.8 - 1.2, 1) = max(-1.6 - 1.2, 1) = max(-2.8, 1) = 1
-        $this->assertEquals(1, $result);
+        // Attack = 5 + (1 * 1.5) + (0 * 2) = 6.5
+        // Defense = 1 + (3 * 0.5) + (1 * 0.5) = 3
+        // Damage = max((6.5 - 3) * 0.8 - 1.2, 1) = max(2.8 - 1.2, 1) = 2
+        $this->assertEquals(2, $result);
     }
 
-    public function testEnemyHitRollMiss()
+    public function testEnemyHitRollMiss(): void
     {
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
 
         $this->randomizer->method('rand')->willReturn(80);
@@ -77,7 +77,7 @@ class GameServiceTest extends TestCase
         $this->assertEquals(0, $result);
     }
 
-    public function testGetPlayerCharacter()
+    public function testGetPlayerCharacter(): void
     {
         $characterRepository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
 
@@ -103,7 +103,7 @@ class GameServiceTest extends TestCase
         $this->assertEquals(30, $character->getHealth());
     }
 
-    public function testGenerateEnemy()
+    public function testGenerateEnemy(): void
     {
         $characterRepository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
         $character = new Character('Hero', 10, 10, ClassEnum::WARRIOR);
@@ -121,8 +121,8 @@ class GameServiceTest extends TestCase
             ->willReturnMap([
                 [0, count(EnemiesNameEnum::cases()) - 1, 0], // Pour le type d'ennemi
                 [-1, 2, 0],  // Pour le niveau (niveau_joueur + 0)
-                [1, 3, 1],   // Pour la force (1 + niveau * 0.7)
-                [1, 3, 1]    // Pour la constitution (1 + niveau * 0.5)
+                [2, 4, 2],   // Pour la force (2 + niveau * 1.5)
+                [2, 4, 2]    // Pour la constitution (2 + niveau * 1.0)
             ]);
 
         $enemy = $this->gameService->generateEnemy();
@@ -130,15 +130,15 @@ class GameServiceTest extends TestCase
         $this->assertInstanceOf(Enemy::class, $enemy);
         $this->assertEquals(EnemiesNameEnum::cases()[0], $enemy->getName());
         $this->assertEquals(1, $enemy->getLevel());
-        $this->assertEquals(1, $enemy->getStrength());
-        $this->assertEquals(1, $enemy->getConstitution());
+        $this->assertEquals(3, $enemy->getStrength());
+        $this->assertEquals(3, $enemy->getConstitution()); 
     }
 
-    public function testFight()
+    public function testFight(): void
     {
         $output = $this->createMock(OutputInterface::class);
 
-        $character = new Character('toto', 3, 3, ClassEnum::WARRIOR);
+        $character = new Character('Hero', 3, 3, ClassEnum::WARRIOR);
         $character->setHealth(1000);
         $enemy = new Enemy(EnemiesNameEnum::DRAGON, 1, 1);
         $enemy->setHealth(5);
